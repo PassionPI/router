@@ -1,0 +1,62 @@
+{
+  "name": "@passion_pi/router",
+  "version": "0.1.0",
+  "privet": false,
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "build": "npm run build:check && npm run build:bundle && npm run build:type",
+    "build:bundle": "vite build",
+    "build:check": "npm run test:cov && npm run check",
+    "build:type": "rm -rf ./types && tsc -p ./types.json && rollup -c rollup.config.mjs",
+    "debug:file": "tsx",
+    "test:dev": "vitest",
+    "test:run": "vitest run",
+    "test:cov": "vitest run --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PassionPI/router.git"
+  },
+  "author": "PassionPI <ipjig@qq.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PassionPI/router/issues"
+  },
+  "homepage": "https://github.com/PassionPI/router#readme",
+  "devDependencies": {
+    "@vitest/coverage-v8": "^2.0.1",
+    "rambda": "^9",
+    "rollup": "^4",
+    "rollup-plugin-dts": "^6",
+    "tsx": "^4",
+    "typescript": "^5.5",
+    "vite": "^5",
+    "vitest": "^2"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "main": "./dist/bundle.es.js",
+  "module": "./dist/bundle.es.js",
+  "types": "./dist/bundle.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/bundle.es.js",
+      "require": "./dist/bundle.cjs",
+      "default": "./dist/bundle.es.js",
+      "types": "./dist/bundle.d.ts"
+    }
+  },
+  "keywords": [
+    "radix",
+    "router",
+    "utility"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

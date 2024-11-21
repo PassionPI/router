@@ -22,23 +22,19 @@ const parse = (path: string[]) =>
     return { part };
   });
 
-export const createRadix = <T>() => {
-  type BaseShouldReturn = {
+const createRadix = <T>() => {
+  type ShouldReturn = {
     path: string;
     value?: T;
     params?: Record<string, string>;
-  };
-  type ShouldReturn = BaseShouldReturn & {
-    matches: BaseShouldReturn[];
   };
 
   const root: Item<T>["children"] = {};
   const initial = (): ShouldReturn => ({
     path: "",
-    matches: [],
   });
   return {
-    set(path: Path, value: T): boolean {
+    set(path: Path, produce: (prevValue?: T) => T): boolean {
       let prev;
       let node = root;
       for (let { part, alias } of parse(split(path))) {
@@ -51,10 +47,8 @@ export const createRadix = <T>() => {
         node = x.children;
       }
       if (prev) {
-        if (prev.value == null) {
-          prev.value = value;
-          return true;
-        }
+        prev.value = produce(prev.value);
+        return true;
       }
       return false;
     },
@@ -69,10 +63,6 @@ export const createRadix = <T>() => {
         if (match.alias != null) {
           shouldUpdate.params ??= { ...shouldReturn?.params };
           shouldUpdate.params[match.alias] = param;
-        }
-        if (match.value != null) {
-          const { matches, ...rest } = shouldUpdate;
-          shouldUpdate.matches = [...shouldUpdate.matches, rest];
         }
       };
 
@@ -104,3 +94,8 @@ export const createRadix = <T>() => {
     },
   };
 };
+
+type Radix<T> = ReturnType<typeof createRadix<T>>;
+
+export { createRadix };
+export type { Path, Radix };

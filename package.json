@@ -1,6 +1,6 @@
 {
   "name": "@passion_pi/router",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "privet": false,
   "description": "",
   "type": "module",
@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/PassionPI/router#readme",
   "devDependencies": {
+    "@types/node": "^22.9.1",
     "@vitest/coverage-v8": "^2.0.1",
     "rambda": "^9",
     "rollup": "^4",
@@ -58,5 +59,8 @@
   ],
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "@passion_pi/fp": "^0.3.0"
   }
 }

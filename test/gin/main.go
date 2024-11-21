@@ -17,12 +17,15 @@ func main() {
 		c.Next()
 	})
 
-	x.GET("/ping", func(c *gin.Context) {
+	x.Use(func(c *gin.Context) {
+		println("test regist")
+		c.Next()
+	})
+	x.Any("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
 	})
-
 	x.GET("/ping/*asd", func(c *gin.Context) {
 		x := c.Param("asd")
 

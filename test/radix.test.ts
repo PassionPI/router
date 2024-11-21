@@ -3,23 +3,26 @@ import { expect, test } from "vitest";
 
 test("radix base", () => {
   const tree = createRadix<number>();
-  tree.set("/", 0);
-  tree.set("/foo", 1);
-  tree.set("/foo/bar", 2);
-  tree.set("/foo/bar/baz", 3);
+  tree.set("/", () => 0);
+  tree.set("/foo", () => 1);
+  tree.set("/foo/bar", () => 2);
+  tree.set("/foo/bar/baz", () => 3);
   expect(tree.get("/")?.value).toBe(0);
   expect(tree.get("/foo")?.value).toBe(1);
   expect(tree.get("/foo/bar")?.value).toBe(2);
   expect(tree.get("/foo/bar/baz")?.value).toBe(3);
-  const ok = tree.set("/foo/bar/baz", 4);
-  expect(ok).toBe(false);
-  expect(tree.get("/foo/bar/baz")?.value).toBe(3);
+  const ok = tree.set("/foo/bar/baz", (prev) => {
+    expect(prev).toBe(3);
+    return 4;
+  });
+  expect(ok).toBe(true);
+  expect(tree.get("/foo/bar/baz")?.value).toBe(4);
 });
 
 test("radix with empty value path", () => {
   const tree = createRadix<number>();
-  tree.set("/foo", 1);
-  tree.set("/foo/bar/baz", 3);
+  tree.set("/foo", () => 1);
+  tree.set("/foo/bar/baz", () => 3);
   expect(tree.get("/foo")?.value).toBe(1);
   expect(tree.get("/foo/bar")?.value).toBe(undefined);
   expect(tree.get("/foo/bar/baz")?.value).toBe(3);
@@ -36,11 +39,11 @@ test("radix with empty value path", () => {
 
 test("radix param", () => {
   const tree = createRadix<number>();
-  tree.set("/foo/goo", 0);
-  tree.set("/foo/:bar", 1);
-  tree.set("/foo/:bar/baz", 2);
-  tree.set("/foo/:bar/baz/:bay", 3);
-  tree.set("/:foo/:bar/baz/:bay", 4);
+  tree.set("/foo/goo", () => 0);
+  tree.set("/foo/:bar", () => 1);
+  tree.set("/foo/:bar/baz", () => 2);
+  tree.set("/foo/:bar/baz/:bay", () => 3);
+  tree.set("/:foo/:bar/baz/:bay", () => 4);
   expect(tree.get("/foo")?.value).toBe(undefined);
   expect(tree.get("/foo/goo")?.value).toBe(0);
   expect(tree.get("/foo/bar")?.value).toBe(1);
@@ -62,9 +65,9 @@ test("radix param", () => {
 
 test("radix wild", () => {
   const tree = createRadix<number>();
-  tree.set("/foo/*bar", 1);
-  tree.set("/:foo/*bar", 1);
-  tree.set("/foo/:bar/baz", 2);
+  tree.set("/foo/*bar", () => 1);
+  tree.set("/:foo/*bar", () => 1);
+  tree.set("/foo/:bar/baz", () => 2);
   expect(tree.get("/foo")?.value).toBe(undefined);
   expect(tree.get("/foo/bar")?.value).toEqual(1);
   expect(tree.get("/foo/bar/baz")?.value).toEqual(2);

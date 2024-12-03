@@ -1,6 +1,6 @@
 {
   "name": "@passion_pi/router",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "privet": false,
   "description": "",
   "type": "module",
@@ -61,6 +61,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@passion_pi/fp": "^0.3.0"
+    "@passion_pi/fp": "^0.3.1"
   }
 }

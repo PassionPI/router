@@ -1,7 +1,10 @@
+// import { createGroup } from "./group";
+
 // type Params = {
 //   url?: URL | string | null | undefined;
 // };
 // const core = () => {
+//   const group = createGroup({});
 //   const route = new Map();
 //   const callback = (params: Params) => {
 //     const { url } = params;

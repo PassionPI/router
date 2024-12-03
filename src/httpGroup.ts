@@ -21,6 +21,11 @@ type Handler<Ctx, Return> = (
 
 type HttpMethod = (typeof HTTP_METHOD)[keyof typeof HTTP_METHOD];
 
+type HttpMethodHandler<Ctx, Return> = Record<
+  HttpMethod,
+  (path: Path, ...fns: Handler<Ctx, Return>[]) => void
+>;
+
 type NodeValue<Ctx, Return> = Record<HttpMethod, Handler<Ctx, Return>[]>;
 
 type Engin<Ctx, Return> = {
@@ -28,7 +33,7 @@ type Engin<Ctx, Return> = {
   any(path: Path, ...fns: Handler<Ctx, Return>[]): void;
   group(path: Path, ...fns: Handler<Ctx, Return>[]): Engin<Ctx, Return>;
   handle(method: HttpMethod, path: Path, ...fns: Handler<Ctx, Return>[]): void;
-} & Record<HttpMethod, (path: Path, ...fns: Handler<Ctx, Return>[]) => void>;
+} & HttpMethodHandler<Ctx, Return>;
 
 const createEngin = <Ctx, Return>(
   part: GroupPart<NodeValue<Ctx, Return>, Handler<Ctx, Return>[]>
@@ -59,7 +64,7 @@ const createEngin = <Ctx, Return>(
   const METHODS = Object.values(HTTP_METHOD).reduce((acc, method) => {
     acc[method] = (path, ...fns) => handle(method, path, ...fns);
     return acc;
-  }, {} as Record<HttpMethod, (path: Path, ...fns: Handler<Ctx, Return>[]) => void>);
+  }, {} as HttpMethodHandler<Ctx, Return>);
 
   const any: NewEngin["any"] = (path, ...fns) => {
     Object.values(METHODS).forEach((method) => method(path, ...fns));
@@ -87,10 +92,13 @@ const bindHttpRouter = <
 }) => {
   const group = createGroup<NodeValue<Ctx, Return>, Handler<Ctx, Return>[]>([]);
   const engin = createEngin<Ctx, Return>(group);
+  const match = (method: string, path: Path) =>
+    group.get(path)?.value?.[method as HttpMethod];
+  const clear = (path: Path) => group.lru.del(path);
 
   const handler = async (...input: Inputs): Promise<Return> => {
     const ctx = config.createCtx(...input);
-    const value = group.get(ctx.pathname as Path)?.value?.[ctx.method];
+    const value = match(ctx.method, ctx.pathname);
     if (value) {
       try {
         return await onion(...value)(ctx);
@@ -106,7 +114,7 @@ const bindHttpRouter = <
     return config[404](ctx);
   };
 
-  return { ...engin, handler };
+  return { ...engin, clear, match, handler };
 };
 
 export { bindHttpRouter };

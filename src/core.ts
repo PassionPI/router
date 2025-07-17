@@ -34,7 +34,7 @@ const statics = (path: Path) => {
   return true;
 };
 
-const createRadix = <T>() => {
+const createRadix = <T>(config?: { lruSize?: number }) => {
   type ShouldReturn = {
     path: string;
     value?: T;
@@ -42,7 +42,7 @@ const createRadix = <T>() => {
   };
 
   const map = new Map<string, T>();
-  const lru = LRU<string, ShouldReturn>(100);
+  const lru = LRU<string, ShouldReturn>(config?.lruSize || 100);
   const root: Item<T>["child"] = new Map();
   const initial = (): ShouldReturn => ({
     path: "",
@@ -118,6 +118,10 @@ const createRadix = <T>() => {
       acc.value = item.value;
       if (item.alias != null) {
         acc.params[item.alias] = part;
+      }
+
+      if (item.child.size == 0) {
+        break;
       }
 
       node = item.child;

@@ -1,6 +1,6 @@
 {
   "name": "@passion_pi/router",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "privet": false,
   "description": "",
   "type": "module",
@@ -27,14 +27,14 @@
   "homepage": "https://github.com/PassionPI/router#readme",
   "devDependencies": {
     "@types/node": "^22.9.1",
-    "@vitest/coverage-v8": "^2.0.1",
+    "@vitest/coverage-v8": "^3",
     "rambda": "^9",
-    "rollup": "^4",
-    "rollup-plugin-dts": "^6",
-    "tsx": "^4",
-    "typescript": "^5.5",
-    "vite": "^5",
-    "vitest": "^2"
+    "rollup": "^4.45",
+    "rollup-plugin-dts": "^6.2",
+    "tsx": "^4.20",
+    "typescript": "^5.8",
+    "vite": "^7",
+    "vitest": "^3.2"
   },
   "files": [
     "dist",
@@ -42,14 +42,13 @@
     "CHANGELOG.md"
   ],
   "main": "./dist/bundle.es.js",
-  "module": "./dist/bundle.es.js",
   "types": "./dist/bundle.d.ts",
+  "module": "./dist/bundle.es.js",
   "exports": {
     ".": {
+      "types": "./dist/bundle.d.ts",
       "import": "./dist/bundle.es.js",
-      "require": "./dist/bundle.cjs",
-      "default": "./dist/bundle.es.js",
-      "types": "./dist/bundle.d.ts"
+      "require": "./dist/bundle.cjs"
     }
   },
   "keywords": [
@@ -61,6 +60,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@passion_pi/fp": "^0.3.1"
+    "@passion_pi/fp": "^0.3.2",
+    "srvx": "^0.8.2"
   }
 }

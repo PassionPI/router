@@ -3,8 +3,8 @@
 // type Params = {
 //   url?: URL | string | null | undefined;
 // };
-// const core = () => {
-//   const group = createGroup({});
+// const core = <NodeValue, BaseValue = NodeValue>(initBase: () => BaseValue) => {
+//   const group = createGroup<NodeValue, BaseValue>(initBase());
 //   const route = new Map();
 //   const callback = (params: Params) => {
 //     const { url } = params;
@@ -15,6 +15,7 @@
 //   };
 //   const register = () => {
 //     console.log("register", route);
+//     group
 //   };
 //   return {
 //     register,

@@ -2,24 +2,22 @@ import { onion } from "@passion_pi/fp";
 import { Path } from "./core";
 import { createGroup, GroupPart } from "./group";
 
-const HTTP_METHOD = {
-  GET: "GET",
-  PUT: "PUT",
-  POST: "POST",
-  HEAD: "HEAD",
-  PATCH: "PATCH",
-  TRACE: "TRACE",
-  DELETE: "DELETE",
-  OPTIONS: "OPTIONS",
-  CONNECT: "CONNECT",
-} as const;
-
 type Handler<Ctx, Return> = (
   ctx: Ctx,
   next: () => Promise<Return> | Return
 ) => Promise<Return> | Return;
 
-type HttpMethod = (typeof HTTP_METHOD)[keyof typeof HTTP_METHOD];
+enum HttpMethod {
+  GET = "GET",
+  PUT = "PUT",
+  POST = "POST",
+  HEAD = "HEAD",
+  PATCH = "PATCH",
+  TRACE = "TRACE",
+  DELETE = "DELETE",
+  OPTIONS = "OPTIONS",
+  CONNECT = "CONNECT",
+}
 
 type HttpMethodHandler<Ctx, Return> = Record<
   HttpMethod,
@@ -32,7 +30,7 @@ type Engin<Ctx, Return> = {
   use(...fns: Handler<Ctx, Return>[]): void;
   any(path: Path, ...fns: Handler<Ctx, Return>[]): void;
   group(path: Path, ...fns: Handler<Ctx, Return>[]): Engin<Ctx, Return>;
-  handle(method: HttpMethod, path: Path, ...fns: Handler<Ctx, Return>[]): void;
+  handler(method: HttpMethod, path: Path, ...fns: Handler<Ctx, Return>[]): void;
 } & HttpMethodHandler<Ctx, Return>;
 
 const createEngin = <Ctx, Return>(
@@ -48,7 +46,7 @@ const createEngin = <Ctx, Return>(
     return createEngin(part.group(path, (mids) => [...mids, ...fns]));
   };
 
-  const handle: NewEngin["handle"] = (method, path, ...fns) => {
+  const handler: NewEngin["handler"] = (method, path, ...fns) => {
     part.set(path, (prefix, mids, prev) => {
       if (prev == null) {
         prev = {} as NodeValue<Ctx, Return>;
@@ -61,8 +59,8 @@ const createEngin = <Ctx, Return>(
     });
   };
 
-  const METHODS = Object.values(HTTP_METHOD).reduce((acc, method) => {
-    acc[method] = (path, ...fns) => handle(method, path, ...fns);
+  const METHODS = Object.values(HttpMethod).reduce((acc, method) => {
+    acc[method] = (path, ...fns) => handler(method, path, ...fns);
     return acc;
   }, {} as HttpMethodHandler<Ctx, Return>);
 
@@ -74,7 +72,7 @@ const createEngin = <Ctx, Return>(
     use,
     any,
     group,
-    handle,
+    handler,
     ...METHODS,
   };
 };
@@ -94,9 +92,8 @@ const bindHttpRouter = <
   const engin = createEngin<Ctx, Return>(group);
   const match = (method: string, path: Path) =>
     group.get(path)?.value?.[method as HttpMethod];
-  const clear = (path: Path) => group.lru.del(path);
 
-  const handler = async (...input: Inputs): Promise<Return> => {
+  const callback = async (...input: Inputs): Promise<Return> => {
     const ctx = config.createCtx(...input);
     const value = match(ctx.method, ctx.pathname);
     if (value) {
@@ -114,7 +111,7 @@ const bindHttpRouter = <
     return config[404](ctx);
   };
 
-  return { ...engin, clear, match, handler };
+  return { ...engin, lru: group.lru, match, callback };
 };
 
 export { bindHttpRouter };

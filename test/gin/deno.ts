@@ -1,7 +1,7 @@
 // deno run -A --watch --unstable-sloppy-imports ./test/gin/deno.ts
-import { createHttpRouter } from "../../src/index";
+import { createHttpRouterByDeno } from "../../src/index";
 
-const { app, run } = createHttpRouter<{ a: string }>();
+const { app, run } = createHttpRouterByDeno<{ a: string }>();
 
 app.use((ctx, next) => {
   ctx.store.a = " Hi Deno!";

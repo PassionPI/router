@@ -1,4 +1,8 @@
-import { serve, ServerOptions, ServerRequest } from "srvx";
+import { Server, ServerOptions, ServerRequest } from "srvx";
+import { serve as serveBun } from "srvx/bun";
+import { serve as serveDeno } from "srvx/deno";
+import { serve as serveNode } from "srvx/node";
+
 import { BaseCtx, bindHttpRouter, HttpMethod } from "./httpGroup";
 import { memo } from "./utils";
 
@@ -13,6 +17,11 @@ type RequestCtx<T extends object = object> = BaseCtx & {
   arrayBuffer: () => Promise<ArrayBuffer>;
   store: T;
 };
+
+type Handler<T extends object = object> = (
+  ctx: RequestCtx<Partial<T>>,
+  next: () => Promise<Response>
+) => Promise<Response>;
 
 const createCtx = <T extends object = object>(
   request: ServerRequest
@@ -34,23 +43,31 @@ const createCtx = <T extends object = object>(
   };
 };
 
-const createHttpRouter = <T extends object = object>() => {
-  const app = bindHttpRouter<[ServerRequest], RequestCtx<Partial<T>>, Response>(
-    {
+const _createHttpRouter =
+  (adapter: (options: ServerOptions) => Server) =>
+  <T extends object = object>() => {
+    const app = bindHttpRouter<
+      [ServerRequest],
+      RequestCtx<Partial<T>>,
+      Response
+    >({
       createCtx,
       404: (_) => new Response("Not Found", { status: 404 }),
       500: (_, error) => new Response(error.message, { status: 500 }),
-    }
-  );
-  return {
-    app,
-    run: (options?: Omit<ServerOptions, "fetch">) =>
-      serve({
-        ...options,
-        fetch: app.callback,
-      }),
+    });
+    return {
+      app,
+      run: (options?: Omit<ServerOptions, "fetch">) =>
+        adapter({
+          ...options,
+          fetch: app.callback,
+        }),
+    };
   };
-};
 
-export { createHttpRouter };
-export type { RequestCtx };
+const createHttpRouter = _createHttpRouter(serveNode);
+const createHttpRouterByBun = _createHttpRouter(serveBun);
+const createHttpRouterByDeno = _createHttpRouter(serveDeno);
+
+export { createHttpRouter, createHttpRouterByBun, createHttpRouterByDeno };
+export type { Handler, RequestCtx };

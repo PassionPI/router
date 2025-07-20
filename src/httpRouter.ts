@@ -15,11 +15,11 @@ type RequestCtx<T extends object = object> = BaseCtx & {
   bytes: () => Promise<Uint8Array>;
   formData: () => Promise<FormData>;
   arrayBuffer: () => Promise<ArrayBuffer>;
-  store: T;
+  store: Partial<T>;
 };
 
 type Handler<T extends object = object> = (
-  ctx: RequestCtx<Partial<T>>,
+  ctx: RequestCtx<T>,
   next: () => Promise<Response> | Response
 ) => Promise<Response> | Response;
 
@@ -48,7 +48,7 @@ const _createHttpRouter =
   <T extends object = object>() => {
     const app = bindHttpRouter<
       [ServerRequest],
-      RequestCtx<Partial<T>>,
+      RequestCtx<T>,
       Response
     >({
       createCtx,
@@ -71,3 +71,4 @@ const createHttpRouterByDeno = _createHttpRouter(serveDeno);
 
 export { createHttpRouter, createHttpRouterByBun, createHttpRouterByDeno };
 export type { Handler, RequestCtx };
+

@@ -1,12 +1,13 @@
 // deno run -A --watch --unstable-sloppy-imports ./test/gin/deno.ts
-import { createHttpRouterByDeno, Handler } from "../../src/index";
+import { createHttpRouterByDeno, Handler, RequestCtx } from "../../src/index";
 
 type Store = {
   a: string;
 };
 type HttpHandler = Handler<Store>;
+type HttpContext = RequestCtx<Store>;
 const { app, run } = createHttpRouterByDeno<Store>();
-const mid: HttpHandler = (ctx, next) => {
+const mid: HttpHandler = (ctx: HttpContext, next) => {
   ctx.store.a = " Hi Deno!";
   return next();
 };

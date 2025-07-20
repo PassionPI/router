@@ -20,8 +20,8 @@ type RequestCtx<T extends object = object> = BaseCtx & {
 
 type Handler<T extends object = object> = (
   ctx: RequestCtx<Partial<T>>,
-  next: () => Promise<Response>
-) => Promise<Response>;
+  next: () => Promise<Response> | Response
+) => Promise<Response> | Response;
 
 const createCtx = <T extends object = object>(
   request: ServerRequest
